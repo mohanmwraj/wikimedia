@@ -5,6 +5,7 @@ import com.launchdarkly.eventsource.StreamException;
 import com.launchdarkly.eventsource.background.BackgroundEventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
@@ -18,15 +19,18 @@ public class WikimediaChangesProducer {
 
     private KafkaTemplate<String, String> kafkaTemplate;
 
+    @Value("${spring.kafka.topic.name}")
+    private String topicName;
+
     public WikimediaChangesProducer(KafkaTemplate<String, String> kafkaTemplate) {
         this.kafkaTemplate = kafkaTemplate;
     }
 
     public void sendMessage() throws StreamException, InterruptedException {
-        String topic = "wikimedia_recentchange";
+        //String topic = "wikimedia_recentchange";
 
         //to read real time stream data from wikimedia, we use event source
-        BackgroundEventHandler eventHandler = new WikimediaChangesHandler(kafkaTemplate, topic);
+        BackgroundEventHandler eventHandler = new WikimediaChangesHandler(kafkaTemplate, topicName);
         String url = "https://stream.wikimedia.org/v2/stream/recentchange";
 
         EventSource.Builder builder = new EventSource.Builder(/*eventHandler ,*/ URI.create(url));
