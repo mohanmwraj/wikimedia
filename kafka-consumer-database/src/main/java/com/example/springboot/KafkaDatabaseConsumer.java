@@ -1,5 +1,7 @@
 package com.example.springboot;
 
+import com.example.springboot.entity.WikimediaData;
+import com.example.springboot.repository.WikimediaDataRepositroy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -10,6 +12,12 @@ public class KafkaDatabaseConsumer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaDatabaseConsumer.class);
 
+    private WikimediaDataRepositroy dataRepositroy;
+
+    public KafkaDatabaseConsumer(WikimediaDataRepositroy dataRepositroy) {
+        this.dataRepositroy = dataRepositroy;
+    }
+
     @KafkaListener(
             topics = "wikimdeia_recentchange",
             groupId = "myGroup"
@@ -17,5 +25,10 @@ public class KafkaDatabaseConsumer {
     public void consume(String eventMessage){
 
         LOGGER.info((String.format("Event message received -> %s", eventMessage)));
+
+        WikimediaData wikimediaData = new WikimediaData();
+        wikimediaData.setWikiEventData(eventMessage);
+
+        dataRepositroy.save(wikimediaData);
     }
 }
